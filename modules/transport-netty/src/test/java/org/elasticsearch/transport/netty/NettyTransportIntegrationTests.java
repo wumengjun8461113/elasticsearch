@@ -56,7 +56,7 @@ import static org.hamcrest.Matchers.is;
  *
  */
 @ClusterScope(scope = Scope.TEST, supportsDedicatedMasters = false, numDataNodes = 1)
-public class NettyTransportTest extends ESNettyIntegTestCase {
+public class NettyTransportIntegrationTests extends ESNettyIntegTestCase {
     // static so we can use it in anonymous classes
     private static String channelProfileName = null;
 
