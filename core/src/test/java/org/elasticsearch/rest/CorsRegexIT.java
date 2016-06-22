@@ -26,7 +26,6 @@ import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
 import org.elasticsearch.test.rest.client.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 
 import static org.elasticsearch.http.HttpTransportSettings.SETTING_CORS_ALLOW_CREDENTIALS;
 import static org.elasticsearch.http.HttpTransportSettings.SETTING_CORS_ALLOW_METHODS;
@@ -93,7 +92,7 @@ public class CorsRegexIT extends ESIntegTestCase {
                                     .path("/")
                                     .addHeader("User-Agent", "Mozilla Bar")
                                     .addHeader("Origin", corsValue)
-                                    .addHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_METHOD, "GET")
+                                    .addHeader("ACCESS_CONTROL_REQUEST_METHOD", "GET")
                                     .execute();
         assertResponseWithOriginheader(response, corsValue);
         assertThat(response.getHeaders(), hasKey("Access-Control-Allow-Methods"));
@@ -104,7 +103,7 @@ public class CorsRegexIT extends ESIntegTestCase {
                                     .path("/")
                                     .addHeader("User-Agent", "Mozilla Bar")
                                     .addHeader("Origin", "http://evil-host:9200")
-                                    .addHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_METHOD, "GET")
+                                    .addHeader("ACCESS_CONTROL_REQUEST_METHOD", "GET")
                                     .execute();
         // a rejected origin gets a FORBIDDEN - 403
         assertThat(response.getStatusCode(), is(403));

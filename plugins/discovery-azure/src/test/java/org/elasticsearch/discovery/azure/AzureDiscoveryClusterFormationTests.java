@@ -36,6 +36,7 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.plugin.discovery.azure.AzureDiscoveryPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESIntegTestCase;
+import org.elasticsearch.transport.NettyPlugin;
 import org.elasticsearch.transport.TransportSettings;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -64,7 +65,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertNoTimeout;
 
 @ESIntegTestCase.SuppressLocalMode
 @ESIntegTestCase.ClusterScope(numDataNodes = 2, numClientNodes = 0)
@@ -84,7 +84,12 @@ public class AzureDiscoveryClusterFormationTests extends ESIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
-        return pluginList(AzureDiscoveryPlugin.class, TestPlugin.class);
+        return pluginList(AzureDiscoveryPlugin.class, TestPlugin.class, NettyPlugin.class);
+    }
+
+    @Override
+    protected Collection<Class<? extends Plugin>> transportClientPlugins() {
+        return pluginList(NettyPlugin.class);
     }
 
     private static Path keyStoreFile;

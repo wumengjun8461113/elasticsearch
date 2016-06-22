@@ -37,7 +37,6 @@ import org.elasticsearch.cluster.routing.allocation.command.MoveAllocationComman
 import org.elasticsearch.cluster.routing.allocation.decider.EnableAllocationDecider;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.Priority;
-import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.env.Environment;
@@ -45,7 +44,6 @@ import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.indices.IndicesService;
-import org.elasticsearch.indices.recovery.RecoverySource;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -144,7 +142,7 @@ public class IndicesStoreIntegrationIT extends ESIntegTestCase {
             MockTransportService transportServiceNode3 = (MockTransportService) internalCluster().getInstance(TransportService.class, node_3);
             CountDownLatch beginRelocationLatch = new CountDownLatch(1);
             CountDownLatch endRelocationLatch = new CountDownLatch(1);
-            transportServiceNode3.addTracer(new ReclocationStartEndTracer(logger, beginRelocationLatch, endRelocationLatch));
+            transportServiceNode3.addTracer(new MockTransportService.ReclocationStartEndTracer(logger, beginRelocationLatch, endRelocationLatch));
             internalCluster().client().admin().cluster().prepareReroute().add(new MoveAllocationCommand("test", 0, node_1, node_3)).get();
             // wait for relocation to start
             beginRelocationLatch.await();
@@ -460,44 +458,4 @@ public class IndicesStoreIntegrationIT extends ESIntegTestCase {
         return Files.exists(indexDirectory(server, index));
     }
 
-    /**
-     * This Tracer can be used to signal start and end of a recovery.
-     * This is used to test the following:
-     * Whenever a node deletes a shard because it was relocated somewhere else, it first
-     * checks if enough other copies are started somewhere else. The node sends a ShardActiveRequest
-     * to the other nodes that should have a copy according to cluster state.
-     * The nodes that receive this request check if the shard is in state STARTED in which case they
-     * respond with "true". If they have the shard in POST_RECOVERY they register a cluster state
-     * observer that checks at each update if the shard has moved to STARTED.
-     * To test that this mechanism actually works, this can be triggered by blocking the cluster
-     * state processing when a recover starts and only unblocking it shortly after the node receives
-     * the ShardActiveRequest.
-     */
-    public static class ReclocationStartEndTracer extends MockTransportService.Tracer {
-        private final ESLogger logger;
-        private final CountDownLatch beginRelocationLatch;
-        private final CountDownLatch receivedShardExistsRequestLatch;
-
-        public ReclocationStartEndTracer(ESLogger logger, CountDownLatch beginRelocationLatch, CountDownLatch receivedShardExistsRequestLatch) {
-            this.logger = logger;
-            this.beginRelocationLatch = beginRelocationLatch;
-            this.receivedShardExistsRequestLatch = receivedShardExistsRequestLatch;
-        }
-
-        @Override
-        public void receivedRequest(long requestId, String action) {
-            if (action.equals(IndicesStore.ACTION_SHARD_EXISTS)) {
-                receivedShardExistsRequestLatch.countDown();
-                logger.info("received: {}, relocation done", action);
-            }
-        }
-
-        @Override
-        public void requestSent(DiscoveryNode node, long requestId, String action, TransportRequestOptions options) {
-            if (action.equals(RecoverySource.Actions.START_RECOVERY)) {
-                logger.info("sent: {}, relocation starts", action);
-                beginRelocationLatch.countDown();
-            }
-        }
-    }
 }

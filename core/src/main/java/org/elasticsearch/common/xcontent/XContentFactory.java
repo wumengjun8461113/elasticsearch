@@ -24,6 +24,7 @@ import com.fasterxml.jackson.dataformat.smile.SmileConstants;
 import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.bytes.BytesSequence;
 import org.elasticsearch.common.io.Streams;
 import org.elasticsearch.common.xcontent.cbor.CborXContent;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -244,7 +245,7 @@ public class XContentFactory {
     /**
      * Guesses the content type based on the provided bytes.
      */
-    public static XContentType xContentType(BytesReference bytes) {
+    public static XContentType xContentType(BytesSequence bytes) {
         int length = bytes.length();
         if (length == 0) {
             return null;

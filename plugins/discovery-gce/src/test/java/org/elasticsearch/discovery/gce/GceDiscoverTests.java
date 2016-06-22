@@ -30,9 +30,9 @@ import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.SettingsModule;
 import org.elasticsearch.plugin.discovery.gce.GceDiscoveryPlugin;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.transport.NettyPlugin;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -78,7 +78,12 @@ public class GceDiscoverTests extends ESIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
-        return pluginList(GceDiscoveryPlugin.class, TestPlugin.class);
+        return pluginList(GceDiscoveryPlugin.class, TestPlugin.class, NettyPlugin.class);
+    }
+
+    @Override
+    protected Collection<Class<? extends Plugin>> transportClientPlugins() {
+        return pluginList(NettyPlugin.class);
     }
 
     @Override

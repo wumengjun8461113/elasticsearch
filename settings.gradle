@@ -23,6 +23,7 @@ List projects = [
   'modules:lang-painless',
   'modules:reindex',
   'modules:percolator',
+  'modules:transport-netty',
   'plugins:analysis-icu',
   'plugins:analysis-kuromoji',
   'plugins:analysis-phonetic',

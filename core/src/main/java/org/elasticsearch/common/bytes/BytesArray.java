@@ -22,8 +22,6 @@ package org.elasticsearch.common.bytes;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.io.Channels;
 import org.elasticsearch.common.io.stream.StreamInput;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -126,9 +124,10 @@ public class BytesArray implements BytesReference {
         return new BytesArray(Arrays.copyOfRange(bytes, offset, offset + length));
     }
 
+
     @Override
-    public ChannelBuffer toChannelBuffer() {
-        return ChannelBuffers.wrappedBuffer(bytes, offset, length);
+    public void forEach(PageConsumer consumer) {
+        consumer.consume(bytes, offset, length);
     }
 
     @Override

@@ -22,13 +22,13 @@ package org.elasticsearch.common.compress;
 import org.apache.lucene.store.IndexInput;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.bytes.BytesSequence;
 import org.elasticsearch.common.compress.deflate.DeflateCompressor;
 import org.elasticsearch.common.io.Streams;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.io.IOException;
 
@@ -36,23 +36,7 @@ import java.io.IOException;
  */
 public class CompressorFactory {
 
-    private static final Compressor[] compressors;
-    private static volatile Compressor defaultCompressor;
-
-    static {
-        compressors = new Compressor[] {
-                new DeflateCompressor()
-        };
-        defaultCompressor = new DeflateCompressor();
-    }
-
-    public static void setDefaultCompressor(Compressor defaultCompressor) {
-        CompressorFactory.defaultCompressor = defaultCompressor;
-    }
-
-    public static Compressor defaultCompressor() {
-        return defaultCompressor;
-    }
+    private static final Compressor compressor = new DeflateCompressor();
 
     public static boolean isCompressed(BytesReference bytes) {
         return compressor(bytes) != null;
@@ -67,8 +51,7 @@ public class CompressorFactory {
     }
 
     @Nullable
-    public static Compressor compressor(BytesReference bytes) {
-        for (Compressor compressor : compressors) {
+    public static Compressor compressor(BytesSequence bytes) {
             if (compressor.isCompressed(bytes)) {
                 // bytes should be either detected as compressed or as xcontent,
                 // if we have bytes that can be either detected as compressed or
@@ -76,7 +59,6 @@ public class CompressorFactory {
                 assert XContentFactory.xContentType(bytes) == null;
                 return compressor;
             }
-        }
 
         XContentType contentType = XContentFactory.xContentType(bytes);
         if (contentType == null) {
@@ -90,20 +72,11 @@ public class CompressorFactory {
     }
 
     /** true if the bytes were compressed with LZF: only used before elasticsearch 2.0 */
-    private static boolean isAncient(BytesReference bytes) {
+    private static boolean isAncient(BytesSequence bytes) {
         return bytes.length() >= 3 &&
                bytes.get(0) == 'Z' &&
                bytes.get(1) == 'V' &&
                (bytes.get(2) == 0 || bytes.get(2) == 1);
-    }
-
-    public static Compressor compressor(ChannelBuffer buffer) {
-        for (Compressor compressor : compressors) {
-            if (compressor.isCompressed(buffer)) {
-                return compressor;
-            }
-        }
-        throw new NotCompressedException();
     }
 
     /**
@@ -112,10 +85,8 @@ public class CompressorFactory {
     @Deprecated
     @Nullable
     public static Compressor compressor(IndexInput in) throws IOException {
-        for (Compressor compressor : compressors) {
-            if (compressor.isCompressed(in)) {
-                return compressor;
-            }
+        if (compressor.isCompressed(in)) {
+            return compressor;
         }
         return null;
     }
@@ -150,5 +121,9 @@ public class CompressorFactory {
         Streams.copy(compressed, bStream);
         compressed.close();
         return bStream.bytes();
+    }
+
+    public static Compressor getCompressor() {
+        return compressor;
     }
 }

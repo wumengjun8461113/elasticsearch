@@ -23,11 +23,8 @@ import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.CharsRefBuilder;
 import org.elasticsearch.common.io.Channels;
 import org.elasticsearch.common.io.stream.StreamInput;
-import org.elasticsearch.common.netty.NettyUtils;
 import org.elasticsearch.common.util.BigArrays;
 import org.elasticsearch.common.util.ByteArray;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -178,41 +175,26 @@ public class PagedBytesReference implements BytesReference {
         }
     }
 
-    @Override
-    public ChannelBuffer toChannelBuffer() {
+
+    public void forEach(PageConsumer consumer) {
         // nothing to do
         if (length == 0) {
-            return ChannelBuffers.EMPTY_BUFFER;
+            return;
         }
 
-        ChannelBuffer[] buffers;
-        ChannelBuffer currentBuffer = null;
         BytesRef ref = new BytesRef();
         int pos = 0;
-
+        final boolean hasInitialBuffer = offset != 0;
         // are we a slice?
-        if (offset != 0) {
+        if (hasInitialBuffer) {
             // remaining size of page fragment at offset
             int fragmentSize = Math.min(length, PAGE_SIZE - (offset % PAGE_SIZE));
             bytearray.get(offset, fragmentSize, ref);
-            currentBuffer = ChannelBuffers.wrappedBuffer(ref.bytes, ref.offset, fragmentSize);
+            consumer.consume(ref.bytes, ref.offset, fragmentSize);
             pos += fragmentSize;
-        }
-
-        // no need to create a composite buffer for a single page
-        if (pos == length && currentBuffer != null) {
-            return currentBuffer;
-        }
-
-        // a slice > pagesize will likely require extra buffers for initial/trailing fragments
-        int numBuffers = countRequiredBuffers((currentBuffer != null ? 1 : 0), length - pos);
-
-        buffers = new ChannelBuffer[numBuffers];
-        int bufferSlot = 0;
-
-        if (currentBuffer != null) {
-            buffers[bufferSlot] = currentBuffer;
-            bufferSlot++;
+            if (pos == length) {
+                return;// we are done
+            }
         }
 
         // handle remainder of pages + trailing fragment
@@ -220,16 +202,9 @@ public class PagedBytesReference implements BytesReference {
             int remaining = length - pos;
             int bulkSize = (remaining > PAGE_SIZE) ? PAGE_SIZE : remaining;
             bytearray.get(offset + pos, bulkSize, ref);
-            currentBuffer = ChannelBuffers.wrappedBuffer(ref.bytes, ref.offset, bulkSize);
-            buffers[bufferSlot] = currentBuffer;
-            bufferSlot++;
+            consumer.consume(ref.bytes, ref.offset, bulkSize);
             pos += bulkSize;
         }
-
-        // this would indicate that our numBuffer calculation is off by one.
-        assert (numBuffers == bufferSlot);
-
-        return ChannelBuffers.wrappedBuffer(NettyUtils.DEFAULT_GATHERING, buffers);
     }
 
     @Override

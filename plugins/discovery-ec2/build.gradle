@@ -35,6 +35,7 @@ dependencies {
   compile "commons-codec:commons-codec:${versions.commonscodec}"
   compile 'com.fasterxml.jackson.core:jackson-databind:2.5.3'
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.5.0'
+  testCompile project(path: ':modules:transport-netty', configuration: 'runtime')
 }
 
 dependencyLicenses {

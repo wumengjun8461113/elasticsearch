@@ -20,16 +20,16 @@ package org.elasticsearch.common.bytes;
 
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.io.stream.StreamInput;
-import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.channels.GatheringByteChannel;
 
 /**
  * A reference to bytes.
  */
-public interface BytesReference {
+public interface BytesReference extends BytesSequence {
 
     public static class Helper {
 
@@ -84,16 +84,6 @@ public interface BytesReference {
     }
 
     /**
-     * Returns the byte at the specified index. Need to be between 0 and length.
-     */
-    byte get(int index);
-
-    /**
-     * The length.
-     */
-    int length();
-
-    /**
      * Slice the bytes from the <tt>from</tt> index up to <tt>length</tt>.
      */
     BytesReference slice(int from, int length);
@@ -129,11 +119,6 @@ public interface BytesReference {
     BytesArray copyBytesArray();
 
     /**
-     * Returns the bytes as a channel buffer.
-     */
-    ChannelBuffer toChannelBuffer();
-
-    /**
      * Is there an underlying byte array for this bytes reference.
      */
     boolean hasArray();
@@ -162,4 +147,11 @@ public interface BytesReference {
      * Converts to a copied Lucene BytesRef.
      */
     BytesRef copyBytesRef();
+
+    void forEach(PageConsumer consumer);
+
+    interface PageConsumer {
+        void consume(byte[] bytes, int index, int offset);
+        void consume(ByteBuffer byteBuffer);
+    }
 }

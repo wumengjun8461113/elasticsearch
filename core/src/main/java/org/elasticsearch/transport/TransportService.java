@@ -678,7 +678,7 @@ public class TransportService extends AbstractLifecycleComponent<TransportServic
         }
 
         @Override
-        public RequestHandlerRegistry getRequestHandler(String action) {
+        public RequestHandlerRegistry<TransportRequest> getRequestHandler(String action) {
             return requestHandlers.get(action);
         }
 

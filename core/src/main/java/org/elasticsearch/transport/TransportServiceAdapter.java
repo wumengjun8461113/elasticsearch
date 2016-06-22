@@ -44,7 +44,7 @@ public interface TransportServiceAdapter {
      * sent request (before any processing or deserialization was done). Returns the appropriate response handler or null if not
      * found.
      */
-    TransportResponseHandler onResponseReceived(long requestId);
+    TransportResponseHandler<TransportResponse> onResponseReceived(long requestId);
 
     /**
      * called by the {@link Transport} implementation when an incoming request arrives but before
@@ -52,7 +52,7 @@ public interface TransportServiceAdapter {
      */
     void onRequestReceived(long requestId, String action);
 
-    RequestHandlerRegistry getRequestHandler(String action);
+    RequestHandlerRegistry<TransportRequest> getRequestHandler(String action);
 
     void raiseNodeConnected(DiscoveryNode node);
 

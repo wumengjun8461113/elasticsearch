@@ -20,14 +20,13 @@
 package org.elasticsearch.common.compress.deflate;
 
 import org.apache.lucene.store.IndexInput;
-import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.bytes.BytesSequence;
 import org.elasticsearch.common.compress.CompressedIndexInput;
 import org.elasticsearch.common.compress.Compressor;
 import org.elasticsearch.common.io.stream.InputStreamStreamInput;
 import org.elasticsearch.common.io.stream.OutputStreamStreamOutput;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -57,26 +56,12 @@ public class DeflateCompressor implements Compressor {
     private static final int BUFFER_SIZE = 4096;
 
     @Override
-    public boolean isCompressed(BytesReference bytes) {
+    public boolean isCompressed(BytesSequence bytes) {
         if (bytes.length() < HEADER.length) {
             return false;
         }
         for (int i = 0; i < HEADER.length; ++i) {
             if (bytes.get(i) != HEADER[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public boolean isCompressed(ChannelBuffer buffer) {
-        if (buffer.readableBytes() < HEADER.length) {
-            return false;
-        }
-        final int offset = buffer.readerIndex();
-        for (int i = 0; i < HEADER.length; ++i) {
-            if (buffer.getByte(offset + i) != HEADER[i]) {
                 return false;
             }
         }

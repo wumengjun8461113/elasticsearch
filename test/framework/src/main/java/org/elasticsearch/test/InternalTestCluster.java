@@ -90,7 +90,6 @@ import org.elasticsearch.test.transport.MockTransportService;
 import org.elasticsearch.transport.Transport;
 import org.elasticsearch.transport.TransportService;
 import org.elasticsearch.transport.TransportSettings;
-import org.elasticsearch.transport.netty.NettyTransport;
 import org.junit.Assert;
 
 import java.io.Closeable;
@@ -333,24 +332,6 @@ public final class InternalTestCluster extends TestCluster {
         executor = EsExecutors.newScaling("test runner", 0, Integer.MAX_VALUE, 0, TimeUnit.SECONDS, EsExecutors.daemonThreadFactory("test_" + clusterName), new ThreadContext(Settings.EMPTY));
     }
 
-    public static String configuredNodeMode() {
-        Builder builder = Settings.builder();
-        if (Strings.isEmpty(System.getProperty("tests.es.node.mode")) && Strings.isEmpty(System.getProperty("tests.node.local"))) {
-            return "local"; // default if nothing is specified
-        }
-        if (Strings.hasLength(System.getProperty("tests.es.node.mode"))) {
-            builder.put(Node.NODE_MODE_SETTING.getKey(), System.getProperty("tests.es.node.mode"));
-        }
-        if (Strings.hasLength(System.getProperty("tests.es.node.local"))) {
-            builder.put(Node.NODE_LOCAL_SETTING.getKey(), System.getProperty("tests.es.node.local"));
-        }
-        if (DiscoveryNode.isLocalNode(builder.build())) {
-            return "local";
-        } else {
-            return "network";
-        }
-    }
-
     @Override
     public String getClusterName() {
         return clusterName;
@@ -425,15 +406,7 @@ public final class InternalTestCluster extends TestCluster {
             }
         }
 
-        // randomize netty settings
-        if (random.nextBoolean()) {
-            builder.put(NettyTransport.WORKER_COUNT.getKey(), random.nextInt(3) + 1);
-            builder.put(NettyTransport.CONNECTIONS_PER_NODE_RECOVERY.getKey(), random.nextInt(2) + 1);
-            builder.put(NettyTransport.CONNECTIONS_PER_NODE_BULK.getKey(), random.nextInt(3) + 1);
-            builder.put(NettyTransport.CONNECTIONS_PER_NODE_REG.getKey(), random.nextInt(6) + 1);
-        }
-
-        if (random.nextBoolean()) {
+    if (random.nextBoolean()) {
             builder.put(MappingUpdatedAction.INDICES_MAPPING_DYNAMIC_TIMEOUT_SETTING.getKey(), new TimeValue(RandomInts.randomIntBetween(random, 10, 30), TimeUnit.SECONDS));
         }
 
@@ -459,10 +432,6 @@ public final class InternalTestCluster extends TestCluster {
             } else {
                 builder.put(RecoverySettings.INDICES_RECOVERY_MAX_BYTES_PER_SEC_SETTING.getKey(), new ByteSizeValue(RandomInts.randomIntBetween(random, 10, 200), ByteSizeUnit.MB));
             }
-        }
-
-        if (random.nextBoolean()) {
-            builder.put(NettyTransport.PING_SCHEDULE.getKey(), RandomInts.randomIntBetween(random, 100, 2000) + "ms");
         }
 
         if (random.nextBoolean()) {

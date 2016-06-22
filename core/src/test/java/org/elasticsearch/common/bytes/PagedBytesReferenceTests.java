@@ -29,13 +29,16 @@ import org.elasticsearch.common.util.ByteArray;
 import org.elasticsearch.indices.breaker.NoneCircuitBreakerService;
 import org.elasticsearch.test.ESTestCase;
 import org.hamcrest.Matchers;
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.After;
 import org.junit.Before;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -380,19 +383,33 @@ public class PagedBytesReferenceTests extends ESTestCase {
     public void testToChannelBuffer() {
         int length = randomIntBetween(10, PAGE_SIZE * randomIntBetween(2, 8));
         BytesReference pbr = getRandomizedPagedBytesReference(length);
-        ChannelBuffer cb = pbr.toChannelBuffer();
-        assertNotNull(cb);
-        byte[] bufferBytes = new byte[length];
-        cb.getBytes(0, bufferBytes);
-        assertArrayEquals(pbr.toBytes(), bufferBytes);
+        assertArrayEquals(pbr.toBytes(), forEachToBytes(pbr));
+    }
+
+    private byte[] forEachToBytes(BytesReference reference) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        WritableByteChannel channel = Channels.newChannel(outputStream);
+        reference.forEach(new BytesReference.PageConsumer() {
+            @Override
+            public void consume(byte[] bytes, int index, int offset) {
+                outputStream.write(bytes, index, offset);
+            }
+
+            @Override
+            public void consume(ByteBuffer byteBuffer) {
+                try {
+                    channel.write(byteBuffer);
+                } catch (IOException e) {
+                    assert false;
+                }
+            }
+        });
+        return outputStream.toByteArray();
     }
 
     public void testEmptyToChannelBuffer() {
         BytesReference pbr = getRandomizedPagedBytesReference(0);
-        ChannelBuffer cb = pbr.toChannelBuffer();
-        assertNotNull(cb);
-        assertEquals(0, pbr.length());
-        assertEquals(0, cb.capacity());
+        assertEquals(0, forEachToBytes(pbr).length);
     }
 
     public void testSliceToChannelBuffer() {
@@ -401,10 +418,7 @@ public class PagedBytesReferenceTests extends ESTestCase {
         int sliceOffset = randomIntBetween(0, pbr.length());
         int sliceLength = randomIntBetween(pbr.length() - sliceOffset, pbr.length() - sliceOffset);
         BytesReference slice = pbr.slice(sliceOffset, sliceLength);
-        ChannelBuffer cbSlice = slice.toChannelBuffer();
-        assertNotNull(cbSlice);
-        byte[] sliceBufferBytes = new byte[sliceLength];
-        cbSlice.getBytes(0, sliceBufferBytes);
+        byte[] sliceBufferBytes = forEachToBytes(slice);
         assertArrayEquals(slice.toBytes(), sliceBufferBytes);
     }
 

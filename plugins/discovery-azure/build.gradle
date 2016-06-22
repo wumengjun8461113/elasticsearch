@@ -53,6 +53,7 @@ dependencies {
   // HACK: javax.xml.bind was removed from default modules in java 9, so we pull the api in here,
   // and whitelist this hack in JarHell 
   compile 'javax.xml.bind:jaxb-api:2.2.2'
+  testCompile project(path: ':modules:transport-netty', configuration: 'runtime')
 }
 
 // needed to be consistent with ssl host checking

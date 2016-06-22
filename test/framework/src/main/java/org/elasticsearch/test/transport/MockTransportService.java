@@ -20,8 +20,10 @@
 package org.elasticsearch.test.transport;
 
 import org.elasticsearch.Version;
-import org.elasticsearch.cluster.ClusterName;
+import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.settings.Setting;
+import org.elasticsearch.indices.recovery.RecoverySource;
+import org.elasticsearch.indices.store.IndicesStore;
 import org.elasticsearch.transport.TransportService;
 
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -34,11 +36,9 @@ import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.network.NetworkModule;
 import org.elasticsearch.common.network.NetworkService;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.SettingsModule;
 import org.elasticsearch.common.transport.BoundTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.util.BigArrays;
 import org.elasticsearch.common.util.concurrent.AbstractRunnable;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.indices.breaker.NoneCircuitBreakerService;
@@ -52,10 +52,8 @@ import org.elasticsearch.transport.Transport;
 import org.elasticsearch.transport.TransportException;
 import org.elasticsearch.transport.TransportRequest;
 import org.elasticsearch.transport.TransportRequestOptions;
-import org.elasticsearch.transport.TransportService;
 import org.elasticsearch.transport.TransportServiceAdapter;
 import org.elasticsearch.transport.local.LocalTransport;
-import org.elasticsearch.transport.netty.NettyTransport;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -65,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A mock transport service that allows to simulate different network topology failures.
@@ -103,20 +102,6 @@ public class MockTransportService extends TransportService {
             }
         };
         return new MockTransportService(settings, transport, threadPool);
-    }
-
-    public static MockTransportService nettyFromThreadPool(
-            Settings settings,
-            ThreadPool threadPool, final Version version) {
-        NamedWriteableRegistry namedWriteableRegistry = new NamedWriteableRegistry();
-        Transport transport = new NettyTransport(settings, threadPool, new NetworkService(settings), BigArrays.NON_RECYCLING_INSTANCE,
-                namedWriteableRegistry, new NoneCircuitBreakerService()) {
-            @Override
-            protected Version getCurrentVersion() {
-                return version;
-            }
-        };
-        return new MockTransportService(Settings.EMPTY, transport, threadPool);
     }
 
 
@@ -615,6 +600,47 @@ public class MockTransportService extends TransportService {
     @Override
     protected Adapter createAdapter() {
         return new MockAdapter();
+    }
+
+    /**
+     * This Tracer can be used to signal start and end of a recovery.
+     * This is used to test the following:
+     * Whenever a node deletes a shard because it was relocated somewhere else, it first
+     * checks if enough other copies are started somewhere else. The node sends a ShardActiveRequest
+     * to the other nodes that should have a copy according to cluster state.
+     * The nodes that receive this request check if the shard is in state STARTED in which case they
+     * respond with "true". If they have the shard in POST_RECOVERY they register a cluster state
+     * observer that checks at each update if the shard has moved to STARTED.
+     * To test that this mechanism actually works, this can be triggered by blocking the cluster
+     * state processing when a recover starts and only unblocking it shortly after the node receives
+     * the ShardActiveRequest.
+     */
+    public static class ReclocationStartEndTracer extends Tracer {
+        private final ESLogger logger;
+        private final CountDownLatch beginRelocationLatch;
+        private final CountDownLatch receivedShardExistsRequestLatch;
+
+        public ReclocationStartEndTracer(ESLogger logger, CountDownLatch beginRelocationLatch, CountDownLatch receivedShardExistsRequestLatch) {
+            this.logger = logger;
+            this.beginRelocationLatch = beginRelocationLatch;
+            this.receivedShardExistsRequestLatch = receivedShardExistsRequestLatch;
+        }
+
+        @Override
+        public void receivedRequest(long requestId, String action) {
+            if (action.equals(IndicesStore.ACTION_SHARD_EXISTS)) {
+                receivedShardExistsRequestLatch.countDown();
+                logger.info("received: {}, relocation done", action);
+            }
+        }
+
+        @Override
+        public void requestSent(DiscoveryNode node, long requestId, String action, TransportRequestOptions options) {
+            if (action.equals(RecoverySource.Actions.START_RECOVERY)) {
+                logger.info("sent: {}, relocation starts", action);
+                beginRelocationLatch.countDown();
+            }
+        }
     }
 
     class MockAdapter extends Adapter {

@@ -1744,7 +1744,7 @@ public abstract class ESIntegTestCase extends ESTestCase {
         }
         SuppressLocalMode noLocal = getAnnotation(this.getClass(), SuppressLocalMode.class);
         SuppressNetworkMode noNetwork = getAnnotation(this.getClass(), SuppressNetworkMode.class);
-        String nodeMode = InternalTestCluster.configuredNodeMode();
+        String nodeMode = "local";
         if (noLocal != null && noNetwork != null) {
             throw new IllegalStateException("Can't suppress both network and local mode");
         } else if (noLocal != null) {
@@ -1752,9 +1752,7 @@ public abstract class ESIntegTestCase extends ESTestCase {
         } else if (noNetwork != null) {
             nodeMode = "local";
         }
-
         Collection<Class<? extends Plugin>> mockPlugins = getMockPlugins();
-
         return new InternalTestCluster(nodeMode, seed, createTempDir(), supportsDedicatedMasters, minNumDataNodes, maxNumDataNodes,
                 InternalTestCluster.clusterName(scope.name(), seed) + "-cluster", nodeConfigurationSource, getNumClientNodes(),
                 InternalTestCluster.DEFAULT_ENABLE_HTTP_PIPELINING, nodePrefix, mockPlugins, getClientWrapper());

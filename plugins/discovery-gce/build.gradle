@@ -20,6 +20,7 @@ dependencies {
   compile "org.apache.httpcomponents:httpcore:${versions.httpcore}"
   compile "commons-logging:commons-logging:${versions.commonslogging}"
   compile "commons-codec:commons-codec:${versions.commonscodec}"
+  testCompile project(path: ':modules:transport-netty', configuration: 'runtime')
 }
 
 

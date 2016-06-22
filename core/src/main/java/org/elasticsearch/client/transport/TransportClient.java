@@ -50,7 +50,6 @@ import org.elasticsearch.search.SearchModule;
 import org.elasticsearch.threadpool.ExecutorBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
-import org.elasticsearch.transport.netty.NettyTransport;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -106,7 +105,7 @@ public class TransportClient extends AbstractClient {
 
         private PluginsService newPluginService(final Settings settings) {
             final Settings.Builder settingsBuilder = Settings.builder()
-                    .put(NettyTransport.PING_SCHEDULE.getKey(), "5s") // enable by default the transport schedule ping interval
+                    .put("transport.ping_schedule", "5s") // enable by default the transport schedule ping interval
                     .put(InternalSettingsPreparer.prepareSettings(settings))
                     .put(NetworkService.NETWORK_SERVER.getKey(), false)
                     .put(CLIENT_TYPE_SETTING_S.getKey(), CLIENT_TYPE);

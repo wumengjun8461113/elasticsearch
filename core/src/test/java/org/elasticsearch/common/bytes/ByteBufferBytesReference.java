@@ -23,9 +23,6 @@ import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.io.Channels;
 import org.elasticsearch.common.io.stream.ByteBufferStreamInput;
 import org.elasticsearch.common.io.stream.StreamInput;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,6 +32,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -43,6 +41,12 @@ import java.nio.charset.StandardCharsets;
 public class ByteBufferBytesReference implements BytesReference {
 
     private final ByteBuffer buffer;
+    private static final CharsetDecoder DECODER;
+    static {
+        DECODER = StandardCharsets.UTF_8.newDecoder();
+        DECODER.onMalformedInput(CodingErrorAction.REPLACE);
+        DECODER.onUnmappableCharacter(CodingErrorAction.REPLACE);
+    }
 
     public ByteBufferBytesReference(ByteBuffer buffer) {
         this.buffer = buffer;
@@ -114,8 +118,8 @@ public class ByteBufferBytesReference implements BytesReference {
     }
 
     @Override
-    public ChannelBuffer toChannelBuffer() {
-        return ChannelBuffers.wrappedBuffer(buffer);
+    public void forEach(PageConsumer consumer) {
+        consumer.consume(buffer);
     }
 
     @Override
@@ -148,15 +152,14 @@ public class ByteBufferBytesReference implements BytesReference {
         if (!buffer.hasRemaining()) {
             return "";
         }
-        final CharsetDecoder decoder = CharsetUtil.getDecoder(StandardCharsets.UTF_8);
         final CharBuffer dst = CharBuffer.allocate(
-                (int) ((double) buffer.remaining() * decoder.maxCharsPerByte()));
+                (int) ((double) buffer.remaining() * DECODER.maxCharsPerByte()));
         try {
-            CoderResult cr = decoder.decode(buffer, dst, true);
+            CoderResult cr = DECODER.decode(buffer, dst, true);
             if (!cr.isUnderflow()) {
                 cr.throwException();
             }
-            cr = decoder.flush(dst);
+            cr = DECODER.flush(dst);
             if (!cr.isUnderflow()) {
                 cr.throwException();
             }
