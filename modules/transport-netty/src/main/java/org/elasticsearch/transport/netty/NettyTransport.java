@@ -162,9 +162,6 @@ public class NettyTransport extends AbstractLifecycleComponent<Transport> implem
         intSetting("transport.connections_per_node.state", 1, 1, Property.NodeScope);
     public static final Setting<Integer> CONNECTIONS_PER_NODE_PING =
         intSetting("transport.connections_per_node.ping", 1, 1, Property.NodeScope);
-    // the scheduled internal ping interval setting, defaults to disabled (-1)
-    public static final Setting<TimeValue> PING_SCHEDULE =
-        timeSetting("transport.ping_schedule", TimeValue.timeValueSeconds(-1), Property.NodeScope);
     public static final Setting<Boolean> TCP_BLOCKING_CLIENT =
         boolSetting("transport.tcp.blocking_client", TcpSettings.TCP_BLOCKING_CLIENT, Property.NodeScope);
     public static final Setting<TimeValue> TCP_CONNECT_TIMEOUT =
@@ -282,7 +279,7 @@ public class NettyTransport extends AbstractLifecycleComponent<Transport> implem
         }
 
         this.scheduledPing = new ScheduledPing();
-        this.pingSchedule = PING_SCHEDULE.get(settings);
+        this.pingSchedule = TransportSettings.PING_SCHEDULE.get(settings);
         this.namedWriteableRegistry = namedWriteableRegistry;
         this.circuitBreakerService = circuitBreakerService;
     }

@@ -264,6 +264,7 @@ public final class ClusterSettings extends AbstractScopedSettings {
                     TransportSettings.BIND_HOST,
                     TransportSettings.PUBLISH_PORT,
                     TransportSettings.PORT,
+                    TransportSettings.PING_SCHEDULE,
                     NetworkService.NETWORK_SERVER,
                     NetworkService.GLOBAL_NETWORK_HOST_SETTING,
                     NetworkService.GLOBAL_NETWORK_BINDHOST_SETTING,

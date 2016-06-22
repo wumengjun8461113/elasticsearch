@@ -21,6 +21,7 @@ package org.elasticsearch.transport;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Setting.Property;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.unit.TimeValue;
 
 import java.util.List;
 import java.util.function.Function;
@@ -29,6 +30,7 @@ import static java.util.Collections.emptyList;
 import static org.elasticsearch.common.settings.Setting.groupSetting;
 import static org.elasticsearch.common.settings.Setting.intSetting;
 import static org.elasticsearch.common.settings.Setting.listSetting;
+import static org.elasticsearch.common.settings.Setting.timeSetting;
 
 /**
  * a collection of settings related to transport components, which are also needed in org.elasticsearch.bootstrap.Security
@@ -49,6 +51,9 @@ final public class TransportSettings {
     public static final String DEFAULT_PROFILE = "default";
     public static final Setting<Settings> TRANSPORT_PROFILES_SETTING =
         groupSetting("transport.profiles.", Property.Dynamic, Property.NodeScope);
+    // the scheduled internal ping interval setting, defaults to disabled (-1)
+    public static final Setting<TimeValue> PING_SCHEDULE =
+        timeSetting("transport.ping_schedule", TimeValue.timeValueSeconds(-1), Property.NodeScope);
 
     private TransportSettings() {
 

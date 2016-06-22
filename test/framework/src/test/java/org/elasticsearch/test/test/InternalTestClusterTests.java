@@ -114,7 +114,17 @@ public class InternalTestClusterTests extends ESTestCase {
         /*while (clusterName.equals(clusterName1)) {
             clusterName1 = clusterName("shared", Integer.toString(CHILD_JVM_ID), clusterSeed);   // spin until the time changes
         }*/
-        NodeConfigurationSource nodeConfigurationSource = NodeConfigurationSource.EMPTY;
+        NodeConfigurationSource nodeConfigurationSource = new NodeConfigurationSource() {
+            @Override
+            public Settings nodeSettings(int nodeOrdinal) {
+                return Settings.builder().put("http.enabled", false).build();
+            }
+
+            @Override
+            public Settings transportClientSettings() {
+                return Settings.EMPTY;
+            }
+        };
         int numClientNodes = randomIntBetween(0, 2);
         boolean enableHttpPipelining = randomBoolean();
         int jvmOrdinal = randomIntBetween(0, 10);

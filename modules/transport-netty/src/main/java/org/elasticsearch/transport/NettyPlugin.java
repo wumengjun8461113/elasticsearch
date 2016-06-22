@@ -50,7 +50,6 @@ public class NettyPlugin extends Plugin {
             NettyTransport.CONNECTIONS_PER_NODE_REG,
             NettyTransport.CONNECTIONS_PER_NODE_STATE,
             NettyTransport.CONNECTIONS_PER_NODE_PING,
-            NettyTransport.PING_SCHEDULE,
             NettyTransport.TCP_BLOCKING_CLIENT,
             NettyTransport.TCP_CONNECT_TIMEOUT,
             NettyTransport.NETTY_MAX_CUMULATION_BUFFER_CAPACITY,
