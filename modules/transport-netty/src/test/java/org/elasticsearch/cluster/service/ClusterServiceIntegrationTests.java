@@ -64,7 +64,7 @@ import static org.hamcrest.Matchers.notNullValue;
  */
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0)
 @ESIntegTestCase.SuppressLocalMode
-public class ClusterServiceTests extends ESNettyIntegTestCase {
+public class ClusterServiceIntegrationTests extends ESNettyIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
