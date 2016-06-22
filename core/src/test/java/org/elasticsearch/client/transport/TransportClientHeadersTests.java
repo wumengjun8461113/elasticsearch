@@ -81,6 +81,7 @@ public class TransportClientHeadersTests extends AbstractClientHeadersTestCase {
         try (TransportClient client = TransportClient.builder()
                 .settings(Settings.builder()
                         .put("client.transport.sniff", true)
+                        .put("transport.type", "local")
                         .put("cluster.name", "cluster1")
                         .put("node.name", "transport_client_" + this.getTestName() + "_1")
                         .put("client.transport.nodes_sampler_interval", "1s")

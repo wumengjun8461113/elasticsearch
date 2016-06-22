@@ -39,6 +39,7 @@ public class SearchRequestBuilderTests extends ESTestCase {
         //this client will not be hit by any request, but it needs to be a non null proper client
         //that is why we create it but we don't add any transport address to it
         Settings settings = Settings.builder()
+                .put("transport.type", "local")
                 .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
                 .build();
         client = TransportClient.builder().settings(settings).build();

@@ -77,6 +77,7 @@ public abstract class AbstractClientHeadersTestCase extends ESTestCase {
     public void initClient() {
         Settings settings = Settings.builder()
                 .put(HEADER_SETTINGS)
+                .put("transport.type", "local")
                 .put("path.home", createTempDir().toString())
                 .put("node.name", "test-" + getTestName())
                 .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
