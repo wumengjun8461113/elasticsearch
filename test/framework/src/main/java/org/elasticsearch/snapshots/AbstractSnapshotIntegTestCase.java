@@ -110,7 +110,8 @@ public abstract class AbstractSnapshotIntegTestCase extends ESIntegTestCase {
     public SnapshotInfo waitForCompletion(String repository, String snapshotName, TimeValue timeout) throws InterruptedException {
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < timeout.millis()) {
-            List<SnapshotInfo> snapshotInfos = client().admin().cluster().prepareGetSnapshots(repository).setSnapshots(snapshotName).get().getSnapshots();
+            List<SnapshotInfo> snapshotInfos = client().admin().cluster().prepareGetSnapshots(repository).setSnapshots(snapshotName)
+                .get().getSnapshots();
             assertThat(snapshotInfos.size(), equalTo(1));
             if (snapshotInfos.get(0).state().completed()) {
                 // Make sure that snapshot clean up operations are finished
@@ -219,7 +220,8 @@ public abstract class AbstractSnapshotIntegTestCase extends ESIntegTestCase {
             this(clusterService, blockOn, countOn, passThroughPriority, TimeValue.timeValueSeconds(70));
         }
 
-        public BlockingClusterStateListener(ClusterService clusterService, final String blockOn, final String countOn, Priority passThroughPriority, TimeValue timeout) {
+        public BlockingClusterStateListener(ClusterService clusterService, final String blockOn, final String countOn,
+                                            Priority passThroughPriority, TimeValue timeout) {
             this.clusterService = clusterService;
             this.blockOn = clusterChangedEvent -> clusterChangedEvent.source().startsWith(blockOn);
             this.countOn = clusterChangedEvent -> clusterChangedEvent.source().startsWith(countOn);
@@ -253,7 +255,8 @@ public abstract class AbstractSnapshotIntegTestCase extends ESIntegTestCase {
                 public ClusterState execute(ClusterState currentState) throws Exception {
                     while(System.currentTimeMillis() < stopWaitingAt) {
                         for (PendingClusterTask task : clusterService.pendingTasks()) {
-                            if (task.getSource().string().equals("test_block") == false && passThroughPriority.sameOrAfter(task.getPriority())) {
+                            if (task.getSource().string().equals("test_block") == false &&
+                                passThroughPriority.sameOrAfter(task.getPriority())) {
                                 // There are other higher priority tasks in the queue and let them pass through and then set the block again
                                 logger.info("passing through cluster state task {}", task.getSource());
                                 addBlock();

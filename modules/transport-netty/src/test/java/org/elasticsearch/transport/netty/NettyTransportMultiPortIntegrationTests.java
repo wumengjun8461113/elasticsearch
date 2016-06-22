@@ -36,6 +36,7 @@ import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
 import org.elasticsearch.test.junit.annotations.Network;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
+import org.elasticsearch.transport.NettyPlugin;
 
 import java.net.InetAddress;
 import java.util.Locale;
@@ -78,7 +79,7 @@ public class NettyTransportMultiPortIntegrationTests extends ESNettyIntegTestCas
                 .put(NetworkModule.TRANSPORT_TYPE_KEY, "netty")
                 .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
                 .build();
-        try (TransportClient transportClient = TransportClient.builder().settings(settings).build()) {
+        try (TransportClient transportClient = TransportClient.builder().settings(settings).addPlugin(NettyPlugin.class).build()) {
             transportClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), randomPort));
             ClusterHealthResponse response = transportClient.admin().cluster().prepareHealth().get();
             assertThat(response.getStatus(), is(ClusterHealthStatus.GREEN));

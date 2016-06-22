@@ -620,7 +620,8 @@ public class MockTransportService extends TransportService {
         private final CountDownLatch beginRelocationLatch;
         private final CountDownLatch receivedShardExistsRequestLatch;
 
-        public ReclocationStartEndTracer(ESLogger logger, CountDownLatch beginRelocationLatch, CountDownLatch receivedShardExistsRequestLatch) {
+        public ReclocationStartEndTracer(ESLogger logger, CountDownLatch beginRelocationLatch,
+                                         CountDownLatch receivedShardExistsRequestLatch) {
             this.logger = logger;
             this.beginRelocationLatch = beginRelocationLatch;
             this.receivedShardExistsRequestLatch = receivedShardExistsRequestLatch;
