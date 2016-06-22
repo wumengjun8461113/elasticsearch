@@ -38,8 +38,10 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptModule;
 import org.elasticsearch.script.ScriptService.ScriptType;
 import org.elasticsearch.test.ESIntegTestCase;
+import org.elasticsearch.transport.ESNetworkIntegTestCase;
 import org.junit.Before;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,10 +59,12 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertSear
 /**
  * Tests that requests with RefreshPolicy.WAIT_UNTIL will be visible when they return.
  */
-public class WaitUntilRefreshIT extends ESIntegTestCase {
+public class WaitUntilRefreshIT extends ESNetworkIntegTestCase {
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-        return Settings.builder().put(super.nodeSettings(nodeOrdinal)).put(NetworkModule.HTTP_ENABLED.getKey(), true).build();
+        return Settings.builder().put(super.nodeSettings(nodeOrdinal))
+            .put(NetworkModule.HTTP_ENABLED.getKey(), true)
+            .build();
     }
 
     @Override
@@ -171,7 +175,9 @@ public class WaitUntilRefreshIT extends ESIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
-        return singleton(DeletePlzPlugin.class);
+        ArrayList<Class<? extends Plugin>> plugins = new ArrayList<>(super.nodePlugins());
+        plugins.add(DeletePlzPlugin.class);
+        return plugins;
     }
 
     public static class DeletePlzPlugin extends Plugin implements ScriptPlugin {

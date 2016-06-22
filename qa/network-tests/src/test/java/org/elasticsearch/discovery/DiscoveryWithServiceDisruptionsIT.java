@@ -109,7 +109,7 @@ import static org.hamcrest.Matchers.nullValue;
 
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0, transportClientRatio = 0)
 @TestLogging("_root:DEBUG,cluster.service:TRACE")
-public class DiscoveryWithServiceDisruptionsTests extends ESNettyIntegTestCase {
+public class DiscoveryWithServiceDisruptionsIT extends ESNettyIntegTestCase {
 
     private static final TimeValue DISRUPTION_HEALING_OVERHEAD = TimeValue.timeValueSeconds(40); // we use 30s as timeout in many places.
 

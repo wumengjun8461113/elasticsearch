@@ -95,7 +95,10 @@ public class ContextAndHeaderTransportIT extends ESIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
-        return pluginList(ActionLoggingPlugin.class);
+        return pluginList(ActionLoggingPlugin.class, NettyPlugin.class);
+    }
+    protected Collection<Class<? extends Plugin>> transportClientPlugins() {
+        return pluginList(NettyPlugin.class);
     }
 
     @Before

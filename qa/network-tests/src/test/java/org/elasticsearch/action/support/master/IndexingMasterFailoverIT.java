@@ -43,7 +43,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes = 0)
 @ESIntegTestCase.SuppressLocalMode
-public class IndexingMasterFailoverTests extends ESNettyIntegTestCase {
+public class IndexingMasterFailoverIT extends ESNettyIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {

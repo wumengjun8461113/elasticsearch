@@ -25,15 +25,11 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.MasterNotDiscoveredException;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
-import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
-import org.elasticsearch.transport.NettyPlugin;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertAcked;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,7 +37,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0)
-public class SpecificMasterNodesTests extends ESNettyIntegTestCase {
+public class SpecificMasterNodesIT extends ESNettyIntegTestCase {
 
     protected final Settings.Builder settingsBuilder() {
         return Settings.builder().put("discovery.type", "zen");

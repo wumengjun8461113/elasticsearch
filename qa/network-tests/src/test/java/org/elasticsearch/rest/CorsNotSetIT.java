@@ -44,7 +44,8 @@ public class CorsNotSetIT extends ESIntegTestCase {
 
     public void testCorsSettingDefaultBehaviourDoesNotReturnAnything() throws Exception {
         String corsValue = "http://localhost:9200";
-        HttpResponse response = httpClient().method("GET").path("/").addHeader("User-Agent", "Mozilla Bar").addHeader("Origin", corsValue).execute();
+        HttpResponse response = httpClient().method("GET").path("/").addHeader("User-Agent", "Mozilla Bar").addHeader("Origin", corsValue)
+            .execute();
 
         assertThat(response.getStatusCode(), is(200));
         assertThat(response.getHeaders(), not(hasKey("Access-Control-Allow-Origin")));

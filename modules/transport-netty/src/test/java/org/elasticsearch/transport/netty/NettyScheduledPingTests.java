@@ -56,7 +56,7 @@ public class NettyScheduledPingTests extends ESTestCase {
         ThreadPool threadPool = new TestThreadPool(getClass().getName());
 
         Settings settings = Settings.builder()
-            .put(NettyTransport.PING_SCHEDULE.getKey(), "5ms")
+            .put(TransportSettings.PING_SCHEDULE.getKey(), "5ms")
             .put(TransportSettings.PORT.getKey(), 0)
             .put("cluster.name", "test")
             .build();

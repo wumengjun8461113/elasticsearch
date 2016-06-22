@@ -35,7 +35,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.discovery.zen.ZenDiscovery;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
 import org.elasticsearch.test.junit.annotations.TestLogging;
@@ -63,8 +62,7 @@ import static org.hamcrest.Matchers.notNullValue;
  *
  */
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0)
-@ESIntegTestCase.SuppressLocalMode
-public class ClusterServiceIntegrationTests extends ESNettyIntegTestCase {
+public class ClusterServiceIT extends ESNettyIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {

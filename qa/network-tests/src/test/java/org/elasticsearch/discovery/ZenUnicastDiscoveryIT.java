@@ -23,23 +23,19 @@ import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
 import org.elasticsearch.test.discovery.ClusterDiscoveryConfiguration;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
-import org.elasticsearch.transport.NettyPlugin;
 import org.junit.Before;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.Matchers.equalTo;
 
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0)
-public class ZenUnicastDiscoveryTests extends ESNettyIntegTestCase {
+public class ZenUnicastDiscoveryIT extends ESNettyIntegTestCase {
 
     private ClusterDiscoveryConfiguration discoveryConfig;
 

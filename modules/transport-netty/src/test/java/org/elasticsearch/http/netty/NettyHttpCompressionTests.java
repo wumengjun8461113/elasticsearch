@@ -31,6 +31,7 @@ import org.elasticsearch.http.HttpTransportSettings;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.rest.client.http.HttpResponse;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
+import org.junit.Assert;
 
 import java.io.IOException;
 
@@ -62,9 +63,9 @@ public class NettyHttpCompressionTests extends ESNettyIntegTestCase {
         CloseableHttpClient internalClient = HttpClients.custom().addInterceptorFirst(headerExtractor).build();
 
         HttpResponse response = httpClient(internalClient).path("/").addHeader(HttpHeaders.ACCEPT_ENCODING, GZIP_ENCODING).execute();
-        assertEquals(200, response.getStatusCode());
-        assertTrue(headerExtractor.hasContentEncodingHeader());
-        assertEquals(GZIP_ENCODING, headerExtractor.getContentEncodingHeader().getValue());
+        Assert.assertEquals(200, response.getStatusCode());
+        Assert.assertTrue(headerExtractor.hasContentEncodingHeader());
+        Assert.assertEquals(GZIP_ENCODING, headerExtractor.getContentEncodingHeader().getValue());
     }
 
     public void testUncompressedResponseByDefault() throws Exception {
@@ -78,8 +79,8 @@ public class NettyHttpCompressionTests extends ESNettyIntegTestCase {
             .build();
 
         HttpResponse response = httpClient(internalClient).path("/").execute();
-        assertEquals(200, response.getStatusCode());
-        assertFalse(headerExtractor.hasContentEncodingHeader());
+        Assert.assertEquals(200, response.getStatusCode());
+        Assert.assertFalse(headerExtractor.hasContentEncodingHeader());
     }
 
     public void testCanInterpretUncompressedRequest() throws Exception {
@@ -99,8 +100,8 @@ public class NettyHttpCompressionTests extends ESNettyIntegTestCase {
             .body(SAMPLE_DOCUMENT)
             .execute();
 
-        assertEquals(201, response.getStatusCode());
-        assertFalse(headerExtractor.hasContentEncodingHeader());
+        Assert.assertEquals(201, response.getStatusCode());
+        Assert.assertFalse(headerExtractor.hasContentEncodingHeader());
     }
 
     public void testCanInterpretCompressedRequest() throws Exception {
@@ -116,9 +117,9 @@ public class NettyHttpCompressionTests extends ESNettyIntegTestCase {
             .body(SAMPLE_DOCUMENT)
             .execute();
 
-        assertEquals(201, response.getStatusCode());
-        assertTrue(headerExtractor.hasContentEncodingHeader());
-        assertEquals(GZIP_ENCODING, headerExtractor.getContentEncodingHeader().getValue());
+        Assert.assertEquals(201, response.getStatusCode());
+        Assert.assertTrue(headerExtractor.hasContentEncodingHeader());
+        Assert.assertEquals(GZIP_ENCODING, headerExtractor.getContentEncodingHeader().getValue());
     }
 
     private static class ContentEncodingHeaderExtractor implements HttpResponseInterceptor {

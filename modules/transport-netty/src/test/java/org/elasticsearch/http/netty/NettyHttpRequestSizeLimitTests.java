@@ -29,9 +29,11 @@ import org.elasticsearch.indices.breaker.HierarchyCircuitBreakerService;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
+import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.junit.Assert;
 
 import java.util.Collection;
 
@@ -78,17 +80,17 @@ public class NettyHttpRequestSizeLimitTests extends ESNettyIntegTestCase {
             requests[i] = Tuple.tuple("/index/type/_bulk", bulkRequest);
         }
 
-        HttpServerTransport httpServerTransport = internalCluster().getInstance(HttpServerTransport.class);
-        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) randomFrom(httpServerTransport.boundAddress
+        HttpServerTransport httpServerTransport = ESIntegTestCase.internalCluster().getInstance(HttpServerTransport.class);
+        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) ESTestCase.randomFrom(httpServerTransport.boundAddress
             ().boundAddresses());
 
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
             Collection<HttpResponse> singleResponse = nettyHttpClient.post(inetSocketTransportAddress.address(), requests[0]);
-            assertThat(singleResponse, hasSize(1));
+            Assert.assertThat(singleResponse, hasSize(1));
             assertAtLeastOnceExpectedStatus(singleResponse, HttpResponseStatus.OK);
 
             Collection<HttpResponse> multipleResponses = nettyHttpClient.post(inetSocketTransportAddress.address(), requests);
-            assertThat(multipleResponses, hasSize(requests.length));
+            Assert.assertThat(multipleResponses, hasSize(requests.length));
             assertAtLeastOnceExpectedStatus(multipleResponses, HttpResponseStatus.SERVICE_UNAVAILABLE);
         }
     }
@@ -103,25 +105,25 @@ public class NettyHttpRequestSizeLimitTests extends ESNettyIntegTestCase {
                 "{ \"transient\": {\"indices.ttl.interval\": \"40s\" } }");
         }
 
-        HttpServerTransport httpServerTransport = internalCluster().getInstance(HttpServerTransport.class);
-        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) randomFrom(httpServerTransport.boundAddress
+        HttpServerTransport httpServerTransport = ESIntegTestCase.internalCluster().getInstance(HttpServerTransport.class);
+        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) ESTestCase.randomFrom(httpServerTransport.boundAddress
             ().boundAddresses());
 
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
             Collection<HttpResponse> responses = nettyHttpClient.put(inetSocketTransportAddress.address(), requestUris);
-            assertThat(responses, hasSize(requestUris.length));
+            Assert.assertThat(responses, hasSize(requestUris.length));
             assertAllInExpectedStatus(responses, HttpResponseStatus.OK);
         }
     }
 
     private void assertAtLeastOnceExpectedStatus(Collection<HttpResponse> responses, HttpResponseStatus expectedStatus) {
         long countExpectedStatus = responses.stream().filter(r -> r.getStatus().equals(expectedStatus)).count();
-        assertThat("Expected at least one request with status [" + expectedStatus + "]", countExpectedStatus, greaterThan(0L));
+        Assert.assertThat("Expected at least one request with status [" + expectedStatus + "]", countExpectedStatus, greaterThan(0L));
     }
 
     private void assertAllInExpectedStatus(Collection<HttpResponse> responses, HttpResponseStatus expectedStatus) {
         long countUnexpectedStatus = responses.stream().filter(r -> r.getStatus().equals(expectedStatus) == false).count();
-        assertThat("Expected all requests with status [" + expectedStatus + "] but [" + countUnexpectedStatus +
+        Assert.assertThat("Expected all requests with status [" + expectedStatus + "] but [" + countUnexpectedStatus +
             "] requests had a different one", countUnexpectedStatus, equalTo(0L));
     }
 }

@@ -51,7 +51,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 
 @ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes = 0)
-public class PrimaryAllocationTests extends ESNettyIntegTestCase {
+public class PrimaryAllocationIT extends ESNettyIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {

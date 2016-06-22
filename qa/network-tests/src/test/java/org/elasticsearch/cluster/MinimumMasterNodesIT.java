@@ -33,7 +33,6 @@ import org.elasticsearch.discovery.zen.elect.ElectMasterService;
 import org.elasticsearch.discovery.zen.fd.FaultDetection;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
 import org.elasticsearch.test.disruption.NetworkDelaysPartition;
@@ -64,7 +63,7 @@ import static org.hamcrest.Matchers.nullValue;
 
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0)
 @TestLogging("_root:DEBUG,cluster.service:TRACE,discovery.zen:TRACE")
-public class MinimumMasterNodesTests extends ESNettyIntegTestCase {
+public class MinimumMasterNodesIT extends ESNettyIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {

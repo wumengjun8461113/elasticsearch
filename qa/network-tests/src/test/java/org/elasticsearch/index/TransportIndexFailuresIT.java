@@ -51,7 +51,7 @@ import static org.hamcrest.Matchers.equalTo;
  */
 @ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes = 0, transportClientRatio = 0)
 @ESIntegTestCase.SuppressLocalMode
-public class TransportIndexFailuresTests extends ESNettyIntegTestCase {
+public class TransportIndexFailuresIT extends ESNettyIntegTestCase {
 
     private static final Settings nodeSettings = Settings.builder()
             .put("discovery.type", "zen") // <-- To override the local setting if set externally

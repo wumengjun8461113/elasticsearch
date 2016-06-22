@@ -26,8 +26,10 @@ import org.elasticsearch.http.HttpServerTransport;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
+import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.junit.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,13 +58,13 @@ public class NettyPipeliningDisabledTests extends ESNettyIntegTestCase {
         ensureGreen();
         String[] requests = new String[] {"/", "/_nodes/stats", "/", "/_cluster/state", "/", "/_nodes", "/"};
 
-        HttpServerTransport httpServerTransport = internalCluster().getInstance(HttpServerTransport.class);
+        HttpServerTransport httpServerTransport = ESIntegTestCase.internalCluster().getInstance(HttpServerTransport.class);
         TransportAddress[] boundAddresses = httpServerTransport.boundAddress().boundAddresses();
-        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) randomFrom(boundAddresses);
+        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) ESTestCase.randomFrom(boundAddresses);
 
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
             Collection<HttpResponse> responses = nettyHttpClient.get(inetSocketTransportAddress.address(), requests);
-            assertThat(responses, hasSize(requests.length));
+            Assert.assertThat(responses, hasSize(requests.length));
 
             List<String> opaqueIds = new ArrayList<>(returnOpaqueIds(responses));
 
@@ -75,6 +77,6 @@ public class NettyPipeliningDisabledTests extends ESNettyIntegTestCase {
      */
     private void assertResponsesOutOfOrder(List<String> opaqueIds) {
         String message = String.format(Locale.ROOT, "Expected returned http message ids to be in any order of: %s", opaqueIds);
-        assertThat(message, opaqueIds, containsInAnyOrder("0", "1", "2", "3", "4", "5", "6"));
+        Assert.assertThat(message, opaqueIds, containsInAnyOrder("0", "1", "2", "3", "4", "5", "6"));
     }
 }

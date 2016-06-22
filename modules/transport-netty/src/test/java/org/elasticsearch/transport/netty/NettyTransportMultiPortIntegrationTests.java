@@ -31,6 +31,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.node.Node;
+import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
@@ -39,6 +40,7 @@ import org.elasticsearch.transport.ESNettyIntegTestCase;
 import org.elasticsearch.transport.NettyPlugin;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.Locale;
 
 import static org.hamcrest.Matchers.allOf;
@@ -51,7 +53,6 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 @ClusterScope(scope = Scope.SUITE, supportsDedicatedMasters = false, numDataNodes = 1, numClientNodes = 0)
 public class NettyTransportMultiPortIntegrationTests extends ESNettyIntegTestCase {
-
     private static int randomPort = -1;
     private static String randomPortRange;
 

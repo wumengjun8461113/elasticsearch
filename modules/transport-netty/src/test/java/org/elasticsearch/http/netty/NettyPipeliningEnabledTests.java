@@ -26,8 +26,10 @@ import org.elasticsearch.http.HttpServerTransport;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 import org.elasticsearch.test.ESIntegTestCase.Scope;
+import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.transport.ESNettyIntegTestCase;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.junit.Assert;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -51,13 +53,13 @@ public class NettyPipeliningEnabledTests extends ESNettyIntegTestCase {
     public void testThatNettyHttpServerSupportsPipelining() throws Exception {
         String[] requests = new String[]{"/", "/_nodes/stats", "/", "/_cluster/state", "/"};
 
-        HttpServerTransport httpServerTransport = internalCluster().getInstance(HttpServerTransport.class);
+        HttpServerTransport httpServerTransport = ESIntegTestCase.internalCluster().getInstance(HttpServerTransport.class);
         TransportAddress[] boundAddresses = httpServerTransport.boundAddress().boundAddresses();
-        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) randomFrom(boundAddresses);
+        InetSocketTransportAddress inetSocketTransportAddress = (InetSocketTransportAddress) ESTestCase.randomFrom(boundAddresses);
 
         try (NettyHttpClient nettyHttpClient = new NettyHttpClient()) {
             Collection<HttpResponse> responses = nettyHttpClient.get(inetSocketTransportAddress.address(), requests);
-            assertThat(responses, hasSize(5));
+            Assert.assertThat(responses, hasSize(5));
 
             Collection<String> opaqueIds = returnOpaqueIds(responses);
             assertOpaqueIdsInOrder(opaqueIds);
@@ -69,7 +71,7 @@ public class NettyPipeliningEnabledTests extends ESNettyIntegTestCase {
         int i = 0;
         String msg = String.format(Locale.ROOT, "Expected list of opaque ids to be monotonically increasing, got [%s]", opaqueIds);
         for (String opaqueId : opaqueIds) {
-            assertThat(msg, opaqueId, is(String.valueOf(i++)));
+            Assert.assertThat(msg, opaqueId, is(String.valueOf(i++)));
         }
     }
 

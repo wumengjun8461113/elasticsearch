@@ -26,7 +26,7 @@ import org.elasticsearch.transport.netty.NettyTransport;
 import java.util.Collection;
 
 @ESIntegTestCase.SuppressLocalMode
-public abstract class ESNettyIntegTestCase extends ESIntegTestCase {
+public abstract class ESNetworkIntegTestCase extends ESIntegTestCase {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {

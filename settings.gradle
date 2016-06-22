@@ -47,6 +47,7 @@ List projects = [
   'plugins:store-smb',
   'qa:backwards-5.0',
   'qa:evil-tests',
+  'qa:network-tests',
   'qa:smoke-test-client',
   'qa:smoke-test-ingest-with-all-dependencies',
   'qa:smoke-test-ingest-disabled',
