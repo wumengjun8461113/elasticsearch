@@ -31,7 +31,7 @@ import static org.hamcrest.object.HasToString.hasToString;
 public class TransportClientTests extends ESTestCase {
 
     public void testThatUsingAClosedClientThrowsAnException() throws ExecutionException, InterruptedException {
-        final TransportClient client = TransportClient.builder().settings(Settings.EMPTY).build();
+        final TransportClient client = TransportClient.builder().settings(Settings.builder().put("transport.type", "local")).build();
         client.close();
         final IllegalStateException e =
             expectThrows(IllegalStateException.class, () -> client.admin().cluster().health(new ClusterHealthRequest()).get());
